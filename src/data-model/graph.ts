@@ -27,9 +27,32 @@ export const graphAtom = atom<Graph | undefined>((get) => {
   }
   return graph;
 });
+export const reverseGraphAtom = atom<Graph | undefined>((get) => {
+  const edges = get(edgesAtom);
+  if (!edges) return;
+  const graph = new Map<string, Node[]>();
+  for (const { from, to } of edges) {
+    const nodes =
+      graph.get(to) ??
+      (() => {
+        const list: Node[] = [];
+        graph.set(to, list);
+        return list;
+      })();
+    nodes.push({ id: from });
+  }
+  return graph;
+});
 export const graphNodesAtom = atomFamily((nodeId: string) =>
   atom((get) => {
     const graph = get(graphAtom);
+    if (!graph) return;
+    return graph.get(nodeId);
+  }),
+);
+export const reverseGraphNodesAtom = atomFamily((nodeId: string) =>
+  atom((get) => {
+    const graph = get(reverseGraphAtom);
     if (!graph) return;
     return graph.get(nodeId);
   }),
