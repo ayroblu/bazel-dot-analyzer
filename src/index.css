@@ -29,6 +29,7 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100dvh;
+  padding: 8px 16px;
 }
 
 button {

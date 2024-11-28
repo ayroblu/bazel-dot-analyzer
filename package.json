@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "dotparser": "^1.1.1",
+    "idb-keyval": "^6.2.1",
+    "jotai": "^2.10.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
