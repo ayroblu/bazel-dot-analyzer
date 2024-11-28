@@ -1,5 +1,9 @@
 import { useAtomValue } from "jotai";
-import { graphNodesAtom, reverseGraphNodesAtom } from "../data-model/graph.ts";
+import {
+  childDepsSetAtom,
+  graphNodesAtom,
+  reverseGraphNodesAtom,
+} from "../data-model/graph.ts";
 import { useState } from "react";
 import styles from "./Nodes.module.css";
 import { filteredNodesAtom } from "../data-model/filter.ts";
@@ -14,10 +18,11 @@ function Node({ id }: { id: string }) {
   const toggle = () => setIsShow((a) => !a);
   const numRdeps = useAtomValue(reverseGraphNodesAtom(id))?.length ?? 0;
   const numDeps = useAtomValue(graphNodesAtom(id))?.length ?? 0;
+  const numChildDeps = useAtomValue(childDepsSetAtom(id))?.size ?? 0;
   return (
     <>
       <p className={styles.cursor} onClick={toggle}>
-        {id} &lt;- {numRdeps} -&gt; {numDeps} deps
+        {id} &lt;- {numRdeps} -&gt; {numDeps} deps ({numChildDeps} child deps)
       </p>
       {isShow && <ChildNodes id={id} />}
     </>

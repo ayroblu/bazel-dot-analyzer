@@ -92,3 +92,18 @@ export const edgesAtom = atom<Edge[] | undefined>((get) => {
     });
   });
 });
+
+/** Assume acyclic graph */
+export const childDepsSetAtom = atomFamily((nodeId: string) =>
+  atom((get) => {
+    const nodes = get(graphNodesAtom(nodeId));
+    if (!nodes) return;
+    let wholeSet = new Set(nodes);
+    for (const node of nodes) {
+      const childSet = get(childDepsSetAtom(node));
+      if (!childSet) continue;
+      wholeSet = wholeSet.union(childSet);
+    }
+    return wholeSet;
+  }),
+);
