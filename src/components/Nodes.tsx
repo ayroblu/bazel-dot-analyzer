@@ -1,14 +1,11 @@
 import { useAtomValue } from "jotai";
-import {
-  graphNodesAtom,
-  nodesAtom,
-  reverseGraphNodesAtom,
-} from "../data-model/graph.ts";
+import { graphNodesAtom, reverseGraphNodesAtom } from "../data-model/graph.ts";
 import { useState } from "react";
 import styles from "./Nodes.module.css";
+import { filteredNodesAtom } from "../data-model/filter.ts";
 
 export function Nodes() {
-  const nodes = useAtomValue(nodesAtom);
+  const nodes = useAtomValue(filteredNodesAtom);
   if (!nodes) return;
   return nodes.map(({ id }) => <Node id={id} key={id} />);
 }
@@ -31,7 +28,7 @@ function ChildNodes({ id }: { id: string }) {
   if (!nodes) return;
   return (
     <div className={styles.leftMargin}>
-      {nodes.map(({ id }) => (
+      {nodes.map((id) => (
         <Node id={id} key={id} />
       ))}
     </div>

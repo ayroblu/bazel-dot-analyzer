@@ -10,36 +10,36 @@ type Edge = {
   from: string;
   to: string;
 };
-type Graph = Map<string, Node[]>;
+type Graph = Map<string, string[]>;
 export const graphAtom = atom<Graph | undefined>((get) => {
   const edges = get(edgesAtom);
   if (!edges) return;
-  const graph = new Map<string, Node[]>();
+  const graph = new Map<string, string[]>();
   for (const { from, to } of edges) {
     const nodes =
       graph.get(from) ??
       (() => {
-        const list: Node[] = [];
+        const list: string[] = [];
         graph.set(from, list);
         return list;
       })();
-    nodes.push({ id: to });
+    nodes.push(to);
   }
   return graph;
 });
 export const reverseGraphAtom = atom<Graph | undefined>((get) => {
   const edges = get(edgesAtom);
   if (!edges) return;
-  const graph = new Map<string, Node[]>();
+  const graph = new Map<string, string[]>();
   for (const { from, to } of edges) {
     const nodes =
       graph.get(to) ??
       (() => {
-        const list: Node[] = [];
+        const list: string[] = [];
         graph.set(to, list);
         return list;
       })();
-    nodes.push({ id: from });
+    nodes.push(from);
   }
   return graph;
 });
