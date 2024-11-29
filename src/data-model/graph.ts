@@ -93,17 +93,21 @@ export const edgesAtom = atom<Edge[] | undefined>((get) => {
   });
 });
 
-/** Assume acyclic graph */
 export const childDepsSetAtom = atomFamily((nodeId: string) =>
   atom((get) => {
-    const nodes = get(graphNodesAtom(nodeId));
-    if (!nodes) return;
-    let wholeSet = new Set(nodes);
-    for (const node of nodes) {
-      const childSet = get(childDepsSetAtom(node));
-      if (!childSet) continue;
-      wholeSet = wholeSet.union(childSet);
+    let wholeSet = new Set([nodeId]);
+    function getChildDepsRecur(nodeId: string) {
+      const nodes = get(graphNodesAtom(nodeId));
+      if (!nodes) return;
+      for (const node of nodes) {
+        if (wholeSet.has(node)) continue;
+        wholeSet.add(node);
+        const childSet = getChildDepsRecur(node);
+        if (!childSet) continue;
+        wholeSet = wholeSet.union(childSet);
+      }
+      return wholeSet;
     }
-    return wholeSet;
+    return getChildDepsRecur(nodeId);
   }),
 );
