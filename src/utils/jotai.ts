@@ -8,17 +8,14 @@ export function persistAtoms<AtomType extends UnknownWritableAtom>(
   store: Store,
   atoms: Array<[key: string, AtomType]>,
 ) {
-  console.log("persisting");
   const disposes = atoms.map(([key, atom]) => {
     idbGet(key).then((v) => {
-      console.log("get", key, v);
       if (v) {
         store.set(atom, v);
       }
     });
     const persist = singleAsync(() => idbSet(key, store.get(atom)));
     const dispose = store.sub(atom, () => {
-      console.log("setting", key, store.get(atom));
       persist();
     });
     return () => {
@@ -49,4 +46,17 @@ function singleAsync(f: () => Promise<void>) {
     });
   }
   return persist;
+}
+
+export function atomFamily<Key, AtomType>(
+  f: (key: Key) => AtomType,
+): (key: Key) => AtomType {
+  const map = new Map();
+  return (key) =>
+    map.get(key) ??
+    (() => {
+      const newAtom = f(key);
+      map.set(key, newAtom);
+      return newAtom;
+    })();
 }

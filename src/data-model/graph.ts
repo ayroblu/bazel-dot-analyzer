@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { dotAtom } from "./input-dot.ts";
 import { collect } from "../utils/main.ts";
-import { atomFamily } from "jotai/utils";
+import { atomFamily } from "../utils/jotai.ts";
 
 type Node = {
   id: string;
@@ -93,21 +93,30 @@ export const edgesAtom = atom<Edge[] | undefined>((get) => {
   });
 });
 
+/** Assume acyclic graph */
 export const childDepsSetAtom = atomFamily((nodeId: string) =>
   atom((get) => {
-    let wholeSet = new Set([nodeId]);
-    function getChildDepsRecur(nodeId: string) {
-      const nodes = get(graphNodesAtom(nodeId));
-      if (!nodes) return;
-      for (const node of nodes) {
-        if (wholeSet.has(node)) continue;
-        wholeSet.add(node);
-        const childSet = getChildDepsRecur(node);
-        if (!childSet) continue;
-        wholeSet = wholeSet.union(childSet);
-      }
-      return wholeSet;
-    }
-    return getChildDepsRecur(nodeId);
+    const map = get(childDepsSetMapAtom);
+    const getDeps = (nodeId: string) => get(graphNodesAtom(nodeId)) ?? [];
+    return calculateChildDeps(nodeId, getDeps, map);
   }),
 );
+const childDepsSetMapAtom = atom(() => new Map());
+function calculateChildDeps(
+  nodeId: string,
+  getDeps: (nodeId: string) => string[],
+  depsMap: Map<string, Set<string>>,
+) {
+  const result = depsMap.get(nodeId);
+  if (result) return result;
+  const nodes = getDeps(nodeId);
+  let wholeSet = new Set(nodes);
+  depsMap.set(nodeId, wholeSet);
+
+  for (const node of nodes) {
+    const childSet = calculateChildDeps(node, getDeps, depsMap);
+    wholeSet = wholeSet.union(childSet);
+  }
+  depsMap.set(nodeId, wholeSet);
+  return wholeSet;
+}
